@@ -4,25 +4,27 @@
 <section class="login-page">
   <div class="login-panel">
     <div class="login-intro">
+      <span class="login-kicker" data-i18n="dash_kicker">غرفة العمليات</span>
       <p class="brand-hero sm" data-i18n="brand">مدار أمني</p>
       <h1 data-i18n="login_title">دخول المنصة</h1>
       <p class="muted" data-i18n="login_sub">ادخل بحسابك حسب دورك.</p>
       <ul class="login-points">
-        <li data-i18n="point_1">غرفة قيادة وخريطة GIS</li>
-        <li data-i18n="point_2">تنبيهات الذكاء الاصطناعي</li>
-        <li data-i18n="point_3">تنسيق ميداني مشفّر</li>
+        <li><i class="fa-solid fa-map-location-dot"></i><span data-i18n="point_1">غرفة قيادة وخريطة GIS</span></li>
+        <li><i class="fa-solid fa-brain"></i><span data-i18n="point_2">تنبيهات الذكاء الاصطناعي</span></li>
+        <li><i class="fa-solid fa-lock"></i><span data-i18n="point_3">تنسيق ميداني مشفّر</span></li>
       </ul>
     </div>
 
     <form class="login-card" method="post">
+      <p class="login-card-kicker" data-i18n="login_secure">دخول آمن للمنصة</p>
       <h2 data-i18n="home_login">تسجيل الدخول</h2>
       <label><span data-i18n="email">البريد الإلكتروني</span>
-        <input type="email" name="email" required autocomplete="username" />
+        <input type="email" name="email" required autocomplete="username" placeholder="admin@madaramney.sa" />
       </label>
       <label><span data-i18n="password">كلمة المرور</span>
         <input type="password" name="password" required autocomplete="current-password" />
       </label>
-      <button class="btn primary lg" type="submit" data-i18n="login_now">دخول الآن</button>
+      <button class="btn primary lg login-submit" type="submit" data-i18n="login_now">دخول الآن</button>
 
       <div class="demo-accounts">
         <p class="muted" data-i18n="demo_accounts">حسابات تجريبية للعرض:</p>

@@ -1,28 +1,36 @@
 {% extends "base.html" %}
 {% block body_class %}public{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+{% endblock %}
 {% block body %}
 <header class="site-nav">
   <a class="nav-brand" href="{{ url_for('auth.home') }}">
     <span class="nav-orbit" aria-hidden="true"></span>
-    <strong data-i18n="brand">مدار أمني</strong>
+    <span>
+      <strong data-i18n="brand">مدار أمني</strong>
+      <small>Madar Amney</small>
+    </span>
   </a>
   <nav class="nav-links">
     <a href="{{ url_for('auth.home') }}#about" data-i18n="home_about">عن النظام</a>
     <a href="{{ url_for('auth.home') }}#features" data-i18n="home_features">المميزات</a>
     <a href="{{ url_for('auth.home') }}#roles" data-i18n="home_roles">المستخدمون</a>
-    <div class="lang-switch">
-      <button type="button" class="lang-btn" data-set-lang="ar" data-i18n="lang_ar">العربية</button>
-      <button type="button" class="lang-btn" data-set-lang="en" data-i18n="lang_en">English</button>
-    </div>
-    {% if current_user.is_authenticated %}
-      {% if current_user.role == 'officer' %}
-        <a class="btn primary" href="{{ url_for('main.field_home') }}" data-i18n="nav_home">لوحة الميدان</a>
+    <div class="nav-actions">
+      <div class="lang-switch">
+        <button type="button" class="lang-btn" data-set-lang="ar" data-i18n="lang_ar">العربية</button>
+        <button type="button" class="lang-btn" data-set-lang="en" data-i18n="lang_en">English</button>
+      </div>
+      {% if current_user.is_authenticated %}
+        {% if current_user.role == 'officer' %}
+          <a class="btn primary" href="{{ url_for('main.field_home') }}" data-i18n="nav_home">لوحة الميدان</a>
+        {% else %}
+          <a class="btn primary" href="{{ url_for('main.dashboard') }}" data-i18n="nav_home">غرفة العمليات</a>
+        {% endif %}
       {% else %}
-        <a class="btn primary" href="{{ url_for('main.dashboard') }}" data-i18n="nav_home">غرفة العمليات</a>
+        <a class="btn primary" href="{{ url_for('auth.login') }}" data-i18n="home_login">تسجيل الدخول</a>
       {% endif %}
-    {% else %}
-      <a class="btn primary" href="{{ url_for('auth.login') }}" data-i18n="home_login">تسجيل الدخول</a>
-    {% endif %}
+    </div>
   </nav>
 </header>
 {% block content %}{% endblock %}
