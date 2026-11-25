@@ -21,6 +21,14 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["UPLOAD_FOLDER"] = str(base / "uploads")
 
+    # Render / reverse proxies terminate TLS; trust X-Forwarded-* so HTTPS + cookies work.
+    if os.environ.get("RENDER") or os.environ.get("FORCE_HTTPS"):
+        from werkzeug.middleware.proxy_fix import ProxyFix
+
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+        app.config["PREFERRED_URL_SCHEME"] = "https"
+        app.config["SESSION_COOKIE_SECURE"] = True
+
     Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
 
     db.init_app(app)

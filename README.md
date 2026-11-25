@@ -19,7 +19,24 @@ $env:MADAR_OFFICER_PASSWORD = Read-Host "Choose the Officer password"
 python run.py
 ```
 
-افتح: http://127.0.0.1:5000
+محليًا مع كاميرا الجوال استخدم `https://` (الشهادة التجريبية قد تحتاج موافقة في المتصفح).
+
+## النشر على Render (إنترنت — مو لازم نفس الشبكة)
+
+بعد الربط مع المستودع، الموقع يكون على رابط مثل `https://madar-amney.onrender.com`:
+- الجوال يفتح نفس الرابط من أي شبكة ويتبث من الكاميرا
+- غرفة العمليات تفتح نفس الرابط من أي جهاز
+
+في Render Environment ضع:
+- `MADAR_ADMIN_PASSWORD`
+- `MADAR_MANAGER_PASSWORD`
+- `MADAR_OFFICER_PASSWORD`
+- `SECRET_KEY` (ثابت)
+
+أمر التشغيل (موجود في `render.yaml`):
+`gunicorn -b 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 120 "run:app"`
+
+ملاحظة: لازم `workers=1` لأن بث الكاميرا يُحفظ في ذاكرة العملية.
 
 ## الحسابات
 
