@@ -1,14 +1,16 @@
 import json
 import secrets
+import time
 from datetime import datetime
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from app import db
 from app.ai import simulate_threat
 from app.auth import role_required
 from app.models import Alert, CameraPoint, Message, StreamSession, Task, User, ZoneStatus
+from app.stream_hub import clear_frame, get_frame, list_live, put_frame
 
 main_bp = Blueprint("main", __name__)
 
@@ -417,6 +419,11 @@ def field_stream():
     if request.method == "POST":
         action = request.form.get("action")
         if action == "start":
+            if active:
+                active.is_active = False
+                active.ended_at = datetime.utcnow()
+                if active.camera_id:
+                    clear_frame(active.camera_id)
             camera_id = int(request.form["camera_id"]) if request.form.get("camera_id") else None
             cam = db.session.get(CameraPoint, camera_id) if camera_id else None
             if cam:
@@ -429,11 +436,12 @@ def field_stream():
             )
             db.session.add(session)
             db.session.commit()
-            flash("تم بدء جلسة البث المباشر.", "success")
+            flash("تم بدء جلسة البث. اسمح للكاميرا عند الطلب.", "success")
         elif action == "stop" and active:
             active.is_active = False
             active.ended_at = datetime.utcnow()
             if active.camera_id:
+                clear_frame(active.camera_id)
                 cam = db.session.get(CameraPoint, active.camera_id)
                 if cam:
                     others = StreamSession.query.filter_by(camera_id=cam.id, is_active=True).count()
@@ -464,6 +472,66 @@ def field_stream():
         return redirect(url_for("main.field_stream"))
 
     return render_template("field_stream.html", cameras=cameras, active=active)
+
+
+@main_bp.route("/api/stream/frame", methods=["POST"])
+@login_required
+@role_required("officer")
+def upload_stream_frame():
+    active = StreamSession.query.filter_by(officer_id=current_user.id, is_active=True).first()
+    if not active or not active.camera_id:
+        return jsonify(ok=False, error="no_active_stream"), 400
+    data = request.get_data(cache=False)
+    if not data or len(data) < 100 or len(data) > 2_500_000:
+        return jsonify(ok=False, error="bad_frame"), 400
+    put_frame(active.camera_id, data, current_user.id, active.session_token)
+    cam = db.session.get(CameraPoint, active.camera_id)
+    if cam and not cam.is_online:
+        cam.is_online = True
+        db.session.commit()
+    return jsonify(ok=True, camera_id=active.camera_id)
+
+
+@main_bp.route("/api/stream/latest/<int:camera_id>")
+@login_required
+def latest_stream_frame(camera_id):
+    frame = get_frame(camera_id)
+    if not frame or time.time() - frame["ts"] > 8:
+        return Response(status=404)
+    resp = Response(frame["jpeg"], mimetype="image/jpeg")
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return resp
+
+
+@main_bp.route("/api/stream/mjpeg/<int:camera_id>")
+@login_required
+def mjpeg_stream(camera_id):
+    boundary = b"frame"
+
+    def generate():
+        last_ts = 0.0
+        idle = 0
+        while idle < 200:
+            frame = get_frame(camera_id)
+            if frame and frame["ts"] != last_ts and time.time() - frame["ts"] < 8:
+                last_ts = frame["ts"]
+                idle = 0
+                yield b"--" + boundary + b"\r\nContent-Type: image/jpeg\r\n\r\n" + frame["jpeg"] + b"\r\n"
+            else:
+                idle += 1
+            time.sleep(0.12)
+
+    return Response(
+        generate(),
+        mimetype="multipart/x-mixed-replace; boundary=frame",
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate", "X-Accel-Buffering": "no"},
+    )
+
+
+@main_bp.route("/api/stream/status")
+@login_required
+def stream_status():
+    return jsonify(active=list_live())
 
 
 @main_bp.route("/field/map", methods=["GET", "POST"])

@@ -69,7 +69,7 @@
     </div>
     <div class="live-grid">
       {% for c in cameras[:4] %}
-      <div class="live-tile {% if c.is_online %}on{% else %}off{% endif %}">
+      <div class="live-tile {% if c.is_online %}on{% else %}off{% endif %}" data-live-camera="{{ c.id }}">
         <span class="live-tag">
           {% if c.is_online %}<i class="fa-solid fa-circle"></i> <span data-i18n="live">مباشر</span>
           {% else %}<span data-i18n="offline">غير متصل</span>{% endif %}
@@ -143,6 +143,7 @@
 {% endblock %}
 
 {% block page_scripts %}
+<script src="{{ url_for('static', filename='js/live-viewer.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
 (() => {

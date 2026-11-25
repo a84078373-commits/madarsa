@@ -31,7 +31,7 @@
 
   <div class="live-grid" style="grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin-top:1rem">
     {% for c in cameras %}
-    <div class="live-tile {% if c.is_online %}on{% else %}off{% endif %}">
+    <div class="live-tile {% if c.is_online %}on{% else %}off{% endif %}" data-live-camera="{{ c.id }}">
       <span class="live-tag">
         {% if c.is_online %}<i class="fa-solid fa-circle"></i> <span data-i18n="live">مباشر</span>
         {% else %}<span data-i18n="offline">غير متصل</span>{% endif %}
@@ -66,4 +66,7 @@
     {% endfor %}
   </div>
 </article>
+{% endblock %}
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/live-viewer.js') }}"></script>
 {% endblock %}

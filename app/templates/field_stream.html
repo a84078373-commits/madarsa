@@ -2,23 +2,41 @@
 {% block title %}البث · مدار أمني{% endblock %}
 {% block content %}
 <section class="panel">
-  <h2>Live Stream Initiation</h2>
-  <p class="muted">{% if active %}البث نشط · Session {{ active.session_token }}{% else %}جاهز لبدء البث{% endif %}</p>
-  <div class="feed-window {% if active %}online{% else %}offline{% endif %}">
-    <p>{% if active %}● LIVE FIELD CHANNEL{% else %}● IDLE{% endif %}</p>
+  <h2>البث المباشر من الجوال</h2>
+  <p class="muted">
+    {% if active %}
+      البث نشط · كاميرا #{{ active.camera_id }} · {{ active.session_token }}
+    {% else %}
+      اختر نقطة كاميرا ثم ابدأ البث — سيُطلب إذن كاميرا الجوال
+    {% endif %}
+  </p>
+
+  <div class="phone-stream-box {% if active %}online{% else %}offline{% endif %}">
+    <video id="fieldCamPreview" playsinline muted autoplay></video>
+    <canvas id="fieldCamCanvas" hidden></canvas>
+    <div id="fieldCamPlaceholder" class="feed-placeholder {% if active %}hidden{% endif %}">
+      <p>{% if active %}● جاري فتح الكاميرا...{% else %}● IDLE — لم يبدأ البث{% endif %}</p>
+    </div>
+    <p id="fieldCamStatus" class="stream-status"></p>
   </div>
+
   <form method="post" class="form-grid">
-    <select name="camera_id">
-      {% for c in cameras %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+    <select name="camera_id" {% if active %}disabled{% endif %}>
+      {% for c in cameras %}
+      <option value="{{ c.id }}" {% if active and active.camera_id == c.id %}selected{% endif %}>{{ c.name }} ({{ c.code }})</option>
+      {% endfor %}
     </select>
     {% if not active %}
     <input type="hidden" name="action" value="start" />
-    <button class="btn primary" type="submit">بدء البث المباشر</button>
+    <button class="btn primary" type="submit">بدء البث من كاميرا الجوال</button>
     {% else %}
+    {# keep camera_id in POST when select is disabled #}
+    <input type="hidden" name="camera_id" value="{{ active.camera_id }}" />
     <input type="hidden" name="action" value="stop" />
-    <button class="btn danger" type="submit">إيقاف البث</button>
+    <button class="btn danger" type="submit" id="stopStreamBtn">إيقاف البث</button>
     {% endif %}
   </form>
+
   <form method="post" class="form-grid" style="margin-top:0.8rem">
     <input type="hidden" name="action" value="ai" />
     <select name="camera_id">
@@ -27,4 +45,18 @@
     <button class="btn ghost" type="submit">إرسال تحليل AI لغرفة العمليات</button>
   </form>
 </section>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{% if active and active.camera_id %}
+<script>
+  window.MADAR_STREAM = {
+    active: true,
+    cameraId: {{ active.camera_id }},
+    uploadUrl: {{ url_for('main.upload_stream_frame')|tojson }},
+  };
+</script>
+<script src="{{ url_for('static', filename='js/field-stream.js') }}"></script>
+{% endif %}
 {% endblock %}
