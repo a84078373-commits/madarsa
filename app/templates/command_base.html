@@ -6,14 +6,20 @@
 {% block body %}
 {% set open_alerts = alerts_count|default(0) %}
 <div class="ops-shell">
-  <aside class="ops-sidebar">
-    <a class="ops-logo" href="{{ url_for('main.dashboard') }}">
-      <span class="ops-logo-icon"><i class="fa-solid fa-shield-halved"></i></span>
-      <span>
-        <strong data-i18n="brand">مدار أمني</strong>
-        <small data-i18n="brand_en">Madar Amney</small>
-      </span>
-    </a>
+  <div class="ops-nav-backdrop" id="opsNavBackdrop" hidden></div>
+  <aside class="ops-sidebar" id="opsSidebar">
+    <div class="ops-sidebar-top">
+      <a class="ops-logo" href="{{ url_for('main.dashboard') }}">
+        <span class="ops-logo-icon"><i class="fa-solid fa-shield-halved"></i></span>
+        <span>
+          <strong data-i18n="brand">مدار أمني</strong>
+          <small data-i18n="brand_en">Madar Amney</small>
+        </span>
+      </a>
+      <button type="button" class="ops-sidebar-close" id="opsMenuClose" aria-label="Close menu">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
 
     <nav class="ops-nav">
       <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
@@ -51,6 +57,9 @@
 
   <div class="ops-content">
     <header class="ops-topbar">
+      <button type="button" class="ops-menu-btn" id="opsMenuBtn" aria-label="Open menu" aria-controls="opsSidebar" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+      </button>
       <div class="ops-search">
         <i class="fa-solid fa-magnifying-glass"></i>
         <input type="search" data-i18n-placeholder="search_ph" placeholder="ابحث عن موقع، كاميرا، أو حادثة..." />
@@ -70,7 +79,7 @@
         </button>
         <div class="ops-profile">
           <img src="https://ui-avatars.com/api/?name={{ current_user.name|urlencode }}&background=1E3A5F&color=fff" alt="" />
-          <div>
+          <div class="ops-profile-text">
             <strong>{{ current_user.name }}</strong>
             <small data-role-label="{{ current_user.role }}">
               {% if current_user.role == 'admin' %}مدير النظام
@@ -90,5 +99,6 @@
 </div>
 {% endblock %}
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/ops-shell.js') }}"></script>
 {% block page_scripts %}{% endblock %}
 {% endblock %}

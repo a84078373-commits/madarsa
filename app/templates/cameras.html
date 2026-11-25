@@ -29,7 +29,7 @@
     </form>
   </details>
 
-  <div class="live-grid" style="grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin-top:1rem">
+  <div class="live-grid cameras-live-grid">
     {% for c in cameras %}
     <div class="live-tile {% if c.is_online %}on{% else %}off{% endif %}" data-live-camera="{{ c.id }}">
       <span class="live-tag">
