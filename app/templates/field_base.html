@@ -1,23 +1,70 @@
 {% extends "base.html" %}
 {% block body_class %}field{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+{% endblock %}
 {% block body %}
-<div class="field-app">
-  <header class="field-top">
-    <div>
-      <a class="brand small" href="{{ url_for('auth.home') }}">مدار أمني</a>
-      <h1>{{ current_user.name }}</h1>
-      <p class="muted">Mobile Interface · Web · {{ current_user.badge_code }}</p>
+<div class="field-shell">
+  <div class="field-nav-backdrop" id="fieldNavBackdrop" hidden></div>
+
+  <header class="field-bar">
+    <div class="field-bar-start">
+      <button type="button" class="field-menu-btn" id="fieldMenuBtn" aria-label="القائمة" aria-expanded="false" aria-controls="fieldSideNav">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <a class="field-brand" href="{{ url_for('main.field_home') }}">
+        <span class="field-brand-ico"><i class="fa-solid fa-shield-halved"></i></span>
+        <span>
+          <strong>مدار أمني</strong>
+          <small>{{ current_user.badge_code }}</small>
+        </span>
+      </a>
     </div>
-    <a class="btn ghost" href="{{ url_for('auth.logout') }}">خروج</a>
+
+    <nav class="field-top-nav" aria-label="التنقل الرئيسي">
+      <a href="{{ url_for('main.field_home') }}" class="{% if request.endpoint == 'main.field_home' %}active{% endif %}"><i class="fa-solid fa-house"></i><span>الرئيسية</span></a>
+      <a href="{{ url_for('main.field_stream') }}" class="{% if request.endpoint == 'main.field_stream' %}active{% endif %}"><i class="fa-solid fa-video"></i><span>البث</span></a>
+      <a href="{{ url_for('main.field_map') }}" class="{% if request.endpoint == 'main.field_map' %}active{% endif %}"><i class="fa-solid fa-map-location-dot"></i><span>الخريطة</span></a>
+      <a href="{{ url_for('main.field_alerts') }}" class="{% if request.endpoint == 'main.field_alerts' %}active{% endif %}"><i class="fa-solid fa-bell"></i><span>تنبيهات</span></a>
+      <a href="{{ url_for('main.field_tasks') }}" class="{% if request.endpoint == 'main.field_tasks' %}active{% endif %}"><i class="fa-solid fa-clipboard-list"></i><span>مهامي</span></a>
+      <a href="{{ url_for('main.field_chat') }}" class="{% if request.endpoint == 'main.field_chat' %}active{% endif %}"><i class="fa-solid fa-comments"></i><span>تواصل</span></a>
+    </nav>
+
+    <div class="field-bar-end">
+      <div class="field-user-chip">
+        <img src="https://ui-avatars.com/api/?name={{ current_user.name|urlencode }}&background=1E3A5F&color=fff" alt="" />
+        <span>{{ current_user.name }}</span>
+      </div>
+      <a class="btn ghost field-logout" href="{{ url_for('auth.logout') }}">خروج</a>
+    </div>
   </header>
-  <main class="field-main">{% block content %}{% endblock %}</main>
-  <nav class="field-tabs">
-    <a href="{{ url_for('main.field_home') }}" class="{% if request.endpoint == 'main.field_home' %}active{% endif %}">الرئيسية</a>
-    <a href="{{ url_for('main.field_stream') }}" class="{% if request.endpoint == 'main.field_stream' %}active{% endif %}">البث</a>
-    <a href="{{ url_for('main.field_map') }}" class="{% if request.endpoint == 'main.field_map' %}active{% endif %}">الخريطة</a>
-    <a href="{{ url_for('main.field_alerts') }}" class="{% if request.endpoint == 'main.field_alerts' %}active{% endif %}">تنبيهات</a>
-    <a href="{{ url_for('main.field_tasks') }}" class="{% if request.endpoint == 'main.field_tasks' %}active{% endif %}">مهامي</a>
-    <a href="{{ url_for('main.field_chat') }}" class="{% if request.endpoint == 'main.field_chat' %}active{% endif %}">تواصل</a>
-  </nav>
+
+  <aside class="field-side-nav" id="fieldSideNav" aria-hidden="true">
+    <div class="field-side-head">
+      <div>
+        <strong>{{ current_user.name }}</strong>
+        <p class="muted">ضابط ميدان · {{ current_user.badge_code }}</p>
+      </div>
+      <button type="button" class="field-side-close" id="fieldMenuClose" aria-label="إغلاق">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <nav class="field-side-links">
+      <a href="{{ url_for('main.field_home') }}" class="{% if request.endpoint == 'main.field_home' %}active{% endif %}"><i class="fa-solid fa-house"></i> الرئيسية</a>
+      <a href="{{ url_for('main.field_stream') }}" class="{% if request.endpoint == 'main.field_stream' %}active{% endif %}"><i class="fa-solid fa-video"></i> البث المباشر</a>
+      <a href="{{ url_for('main.field_map') }}" class="{% if request.endpoint == 'main.field_map' %}active{% endif %}"><i class="fa-solid fa-map-location-dot"></i> الخريطة</a>
+      <a href="{{ url_for('main.field_alerts') }}" class="{% if request.endpoint == 'main.field_alerts' %}active{% endif %}"><i class="fa-solid fa-bell"></i> التنبيهات</a>
+      <a href="{{ url_for('main.field_tasks') }}" class="{% if request.endpoint == 'main.field_tasks' %}active{% endif %}"><i class="fa-solid fa-clipboard-list"></i> مهامي</a>
+      <a href="{{ url_for('main.field_chat') }}" class="{% if request.endpoint == 'main.field_chat' %}active{% endif %}"><i class="fa-solid fa-comments"></i> التواصل</a>
+    </nav>
+    <a class="btn danger field-side-logout" href="{{ url_for('auth.logout') }}">تسجيل الخروج</a>
+  </aside>
+
+  <main class="field-main">
+    {% block content %}{% endblock %}
+  </main>
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/field-shell.js') }}"></script>
 {% endblock %}

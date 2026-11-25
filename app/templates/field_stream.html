@@ -1,49 +1,69 @@
 {% extends "field_base.html" %}
 {% block title %}البث · مدار أمني{% endblock %}
 {% block content %}
-<section class="panel">
-  <h2>البث المباشر من الجوال</h2>
-  <p class="muted">
-    {% if active %}
-      البث نشط · كاميرا #{{ active.camera_id }} · {{ active.session_token }}
-    {% else %}
-      اختر نقطة كاميرا ثم ابدأ البث — سيُطلب إذن كاميرا الجوال
-    {% endif %}
-  </p>
-
-  <div class="phone-stream-box {% if active %}online{% else %}offline{% endif %}">
-    <video id="fieldCamPreview" playsinline muted autoplay></video>
-    <canvas id="fieldCamCanvas" hidden></canvas>
-    <div id="fieldCamPlaceholder" class="feed-placeholder {% if active %}hidden{% endif %}">
-      <p>{% if active %}● جاري فتح الكاميرا...{% else %}● IDLE — لم يبدأ البث{% endif %}</p>
-    </div>
-    <p id="fieldCamStatus" class="stream-status"></p>
+<section class="field-page-head">
+  <div>
+    <p class="field-kicker">واجهة الميدان</p>
+    <h1>البث المباشر</h1>
+    <p class="muted">
+      {% if active %}
+        البث نشط الآن · كاميرا #{{ active.camera_id }}
+      {% else %}
+        اختر نقطة المراقبة ثم ابدأ البث من كاميرا الجوال
+      {% endif %}
+    </p>
   </div>
+  {% if active %}
+  <span class="field-live-badge"><i class="fa-solid fa-circle"></i> مباشر</span>
+  {% endif %}
+</section>
 
-  <form method="post" class="form-grid">
-    <select name="camera_id" {% if active %}disabled{% endif %}>
-      {% for c in cameras %}
-      <option value="{{ c.id }}" {% if active and active.camera_id == c.id %}selected{% endif %}>{{ c.name }} ({{ c.code }})</option>
-      {% endfor %}
-    </select>
-    {% if not active %}
-    <input type="hidden" name="action" value="start" />
-    <button class="btn primary" type="submit">بدء البث من كاميرا الجوال</button>
-    {% else %}
-    {# keep camera_id in POST when select is disabled #}
-    <input type="hidden" name="camera_id" value="{{ active.camera_id }}" />
-    <input type="hidden" name="action" value="stop" />
-    <button class="btn danger" type="submit" id="stopStreamBtn">إيقاف البث</button>
-    {% endif %}
-  </form>
+<section class="field-stream-layout">
+  <article class="panel field-stream-panel">
+    <div class="phone-stream-box {% if active %}online{% else %}offline{% endif %}">
+      <video id="fieldCamPreview" playsinline muted autoplay></video>
+      <canvas id="fieldCamCanvas" hidden></canvas>
+      <div id="fieldCamPlaceholder" class="feed-placeholder {% if active %}hidden{% endif %}">
+        <i class="fa-solid fa-video"></i>
+        <p>{% if active %}جاري فتح الكاميرا...{% else %}لم يبدأ البث بعد{% endif %}</p>
+      </div>
+      <p id="fieldCamStatus" class="stream-status"></p>
+    </div>
 
-  <form method="post" class="form-grid" style="margin-top:0.8rem">
-    <input type="hidden" name="action" value="ai" />
-    <select name="camera_id">
-      {% for c in cameras %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
-    </select>
-    <button class="btn ghost" type="submit">إرسال تحليل AI لغرفة العمليات</button>
-  </form>
+    <form method="post" class="field-stream-controls">
+      <label class="field-label">
+        <span>نقطة الكاميرا</span>
+        <select name="camera_id" {% if active %}disabled{% endif %}>
+          {% for c in cameras %}
+          <option value="{{ c.id }}" {% if active and active.camera_id == c.id %}selected{% endif %}>{{ c.name }} ({{ c.code }})</option>
+          {% endfor %}
+        </select>
+      </label>
+      {% if not active %}
+      <input type="hidden" name="action" value="start" />
+      <button class="btn primary lg" type="submit"><i class="fa-solid fa-play"></i> بدء البث من الجوال</button>
+      {% else %}
+      <input type="hidden" name="camera_id" value="{{ active.camera_id }}" />
+      <input type="hidden" name="action" value="stop" />
+      <button class="btn danger lg" type="submit" id="stopStreamBtn"><i class="fa-solid fa-stop"></i> إيقاف البث</button>
+      {% endif %}
+    </form>
+  </article>
+
+  <article class="panel field-ai-panel">
+    <h2>تحليل AI</h2>
+    <p class="muted">أرسل تنبيهًا فوريًا لغرفة العمليات من موقعك الحالي.</p>
+    <form method="post" class="field-stream-controls">
+      <input type="hidden" name="action" value="ai" />
+      <label class="field-label">
+        <span>الكاميرا المرتبطة</span>
+        <select name="camera_id">
+          {% for c in cameras %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+        </select>
+      </label>
+      <button class="btn ghost" type="submit"><i class="fa-solid fa-brain"></i> إرسال تحليل لغرفة العمليات</button>
+    </form>
+  </article>
 </section>
 {% endblock %}
 
